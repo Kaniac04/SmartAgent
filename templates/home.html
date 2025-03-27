@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}SmartHub - AI Document Chat{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to SmartHub</h1>
+    <p class="hero-text">Transform your documentation into an interactive chat experience powered by AI</p>
+    <div class="hero-buttons">
+        <a href="/chat" class="btn btn-primary">Get Started</a>
+        <a href="/how-it-works" class="btn btn-secondary">Learn More</a>
+    </div>
+</div>
+
+<div class="features-grid">
+    <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>Smart Scraping</h3>
+        <p>Automatically extract and process content from any website or documentation</p>
+        <ul class="feature-list">
+            <li>Multi-page support</li>
+            <li>Intelligent content extraction</li>
+            <li>Real-time progress tracking</li>
+        </ul>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>AI-Powered Chat</h3>
+        <p>Get instant, accurate answers based on your documentation</p>
+        <ul class="feature-list">
+            <li>Context-aware responses</li>
+            <li>Natural language understanding</li>
+            <li>Source-based answers</li>
+        </ul>
+    </div>
+
+    <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Real-time Updates</h3>
+        <p>Watch as your content is processed and made chat-ready</p>
+        <ul class="feature-list">
+            <li>Live processing status</li>
+            <li>Progress indicators</li>
+            <li>Instant availability</li>
+        </ul>
+    </div>
+</div>
+
+<div class="cta-section">
+    <h2>Ready to transform your documentation?</h2>
+    <p>Start chatting with your documents in minutes</p>
+    <a href="/chat" class="btn btn-primary">Try it now</a>
+</div>
+{% endblock %}

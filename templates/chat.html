@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Chat with Documents - SmartHub{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Chat with Your Documents</h1>
+    <p class="hero-text">Enter a URL to start chatting with your documentation</p>
+</div>
+
+<div class="container">
+    <form id="scrape-form" onsubmit="handleSubmit(event)">
+        <div class="input-group">
+            <input type="url" name="url" id="url" placeholder="Enter website URL" required>
+            <button type="submit">Process URL</button>
+        </div>
+        <div id="status" class="status-message"></div>
+    </form>
+
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box"></div>
+        <div class="chat-input-group">
+            <input type="text" id="chat-input" placeholder="Ask a question..." disabled>
+            <button onclick="sendMessage()" id="sendButton" disabled>Send</button>
+        </div>
+    </div>
+</div>
+
+    <script>
+        const sessionId = crypto.randomUUID();
+        const ws = new WebSocket("ws://127.0.0.1:8000/api/chat");
+        let currentResponse = '';
+        let responseDiv = null;
+        const sendButton = document.getElementById("sendButton");
+        const chatInput = document.getElementById("chat-input");
+
+        ws.onopen = () => {
+            console.log("Connected to chat server");
+            ws.send(JSON.stringify({ type: 'init', session_id: sessionId }));
+        };
+
+        ws.onmessage = (event) => {
+            const chatBox = document.getElementById("chat-box");
+            
+            // If this is the first chunk of a new response
+            if (!responseDiv) {
+                // Remove loading message if exists
+                const loadingMsg = document.querySelector('.loading-message');
+                if (loadingMsg) loadingMsg.remove();
+                
+                responseDiv = document.createElement('p');
+                responseDiv.className = 'assistant-message';
+                chatBox.appendChild(responseDiv);
+            }
+            
+            // Append the new chunk
+            currentResponse += event.data;
+            responseDiv.textContent = currentResponse;
+            
+            // Auto-scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // Re-enable button after response
+            sendButton.disabled = false;
+        };
+
+        ws.onclose = () => {
+            sendButton.disabled = false;
+            currentResponse = '';
+            responseDiv = null;
+        };
+
+        function sendMessage() {
+            const input = chatInput;
+            if (ws.readyState === WebSocket.OPEN && input.value) {
+                // Disable button
+                sendButton.disabled = true;
+
+                const message = {
+                type: 'message',
+                content: input.value,
+                session_id: sessionId
+                };
+                
+                // Add user message
+                const chatBox = document.getElementById("chat-box");
+                const userMsg = document.createElement('p');
+                userMsg.className = 'user-message';
+                userMsg.textContent = input.value;
+                chatBox.appendChild(userMsg);
+                
+                // Add loading message
+                const loadingMsg = document.createElement('p');
+                loadingMsg.className = 'loading-message';
+                loadingMsg.innerHTML = '<span class="loading">Thinking</span>';
+                chatBox.appendChild(loadingMsg);
+                
+                // Send message
+                ws.send(JSON.stringify(message));
+                
+                // Clear input and reset response tracking
+                input.value = '';
+                currentResponse = '';
+                responseDiv = null;
+                
+                // Auto-scroll
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        // Add enter key support
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendButton.disabled) {
+                sendMessage();
+            }
+        });
+
+        let isProcessing = false;
+        
+
+        async function handleSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const url = form.url.value;
+            const statusDiv = document.getElementById('status');
+            const sendButton = document.getElementById('sendButton');
+            const chatInput = document.getElementById('chat-input');
+            isProcessing = true;
+            
+            // Disable chat and form
+            sendButton.disabled = true;
+            chatInput.disabled = true;
+            form.querySelector('button').disabled = true;
+            form.querySelector('input').disabled = true;
+
+            statusDiv.innerHTML = '<span class="loading">Checking URL safety...</span>';
+            
+            try {
+                // Start scraping
+                const params = new URLSearchParams();
+                params.append('url', url);
+                params.append('session_id', sessionId);
+
+                const response = await fetch('/api/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: params.toString()
+                });
+                const data = await response.json();
+
+                if (data.status === 'error') {
+                    statusDiv.innerHTML = `<span class="error">${data.message}</span>`;
+                    return;
+                }
+
+                statusDiv.innerHTML = `<span class="loading">${data.message}</span>`;
+
+                // Poll for status updates
+                const statusCheck = setInterval(async () => {
+                    if (!isProcessing) {
+                        clearInterval(statusCheck);
+                        return;
+                    }
+
+                    try {
+                        const statusResponse = await fetch('/api/scraping-status');
+                        const statusData = await statusResponse.json();
+                        
+                        // Update status with loading animation
+                        statusDiv.innerHTML = `<span class="loading"> ${statusData.message} (Scraped: ${statusData.scraped}, Failed: ${statusData.failed})</span>`;
+                        
+                        // Check if scraping is complete
+                        if (statusData.completed) {
+                            isProcessing = false;
+                            clearInterval(statusCheck);
+                            statusDiv.textContent = `Scraping complete! Scraped: ${statusData.scraped}, Failed: ${statusData.failed} - Ready to chat!`;
+                            
+                            // Re-enable all controls
+                            sendButton.disabled = false;
+                            chatInput.disabled = false;
+                            form.querySelector('button').disabled = false;
+                            form.querySelector('input').disabled = false;
+                        }
+                    } catch (pollError) {
+                        console.error('Status check failed:', pollError);
+                    }
+                }, 500); // Check every second
+                
+            } catch (error) {
+                isProcessing = false;
+                statusDiv.textContent = `Error: ${error.message}`;
+                
+                // Re-enable all controls
+                sendButton.disabled = false;
+                chatInput.disabled = false;
+                form.querySelector('button').disabled = false;
+                form.querySelector('input').disabled = false;
+            }
+        }
+    </script>
+{% endblock %}

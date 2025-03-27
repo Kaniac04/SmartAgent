@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SmartHub{% endblock %}</title>
+    <!-- Force CSS reload with dynamic version -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='style.css') }}?v={{ request.app.state.css_version }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">SmartHub</div>
+        <div class="nav-links">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/how-it-works" class="nav-link">How It Works</a>
+            <a href="/chat" class="nav-link">Chat Service</a>
+        </div>
+    </nav>
+    
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer class="footer">
+        <p>© 2025 SmartHub - AI-Powered Document Chat</p>
+    </footer>
+</body>
+</html>
