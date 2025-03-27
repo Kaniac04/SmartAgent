@@ -6,4 +6,3 @@ qdrant_client = qdrant_client.QdrantClient(
     api_key=settings.QDRANT_API_KEY
 )
 
-model = SentenceTransformer(settings.EMBEDDING_MODEL)
