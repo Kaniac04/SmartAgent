@@ -16,7 +16,7 @@ def get_embeddings(texts: List[str]) -> List[List[float]]:
         embeddings = hf_client.feature_extraction(
             texts,
             model=settings.EMBEDDING_MODEL,
-            wait_for_model=True
+            
         )
         return embeddings
     except Exception as e:
