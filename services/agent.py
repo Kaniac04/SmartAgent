@@ -2,14 +2,8 @@ from typing import List
 from mistralai import Mistral, UserMessage, SystemMessage
 from services.qdrant import qdrant_client, model
 from config.config import settings
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer
-from sumy.summarizers.lsa import LsaSummarizer
-from sumy.nlp.stemmers import Stemmer
-from sumy.utils import get_stop_words
-import nltk
 import logging
-
+import google.generativeai as genai
 
 class RAGAgent:
     def __init__(self):
@@ -18,25 +12,25 @@ class RAGAgent:
         self.model_name = "mistral-medium"  
 
         try:
-            nltk.download('punkt')
-            nltk.download('punkt_tab')
+            genai.configure(api_key=settings.GOOGLE_API_KEY)
+            self.summarizer = genai.GenerativeModel('gemini-1.5-flash')
 
         except :
-            logging.error("NLTK Error")
-
-        self.summarizer = LsaSummarizer(Stemmer('english'))
-        self.summarizer.stop_words = get_stop_words('english')
+            logging.error("Summarizer error")
         
-    def _summarize_content(self, content: str, sentences_count: int = 2) -> str:
-        """Summarize content using LSA (Latent Semantic Analysis)"""
+    def _summarize_content(self, content: str) -> str:
+        """Summarize content using Google's Generative AI"""
         try:
-            logging.info("Going to Parser")
-            parser = PlaintextParser.from_string(content, Tokenizer("english"))
-            logging.info("Going to summarizer")
-            summary = self.summarizer(parser.document, sentences_count)
-            return " ".join([str(sentence) for sentence in summary])
+            prompt = f"""Summarize the following text while maintaining key information:
+
+            {content}
+            """
+            
+            response = self.summarizer.generate_content(prompt)
+            return response.text
+            
         except Exception as e:
-            print(f"Summarization failed: {str(e)}")
+            logging.error(f"Summarization failed: {str(e)}")
             return content[:300] + "..."  
 
     def _get_relevant_context(self, query: str, session_id : str, limit: int = 4) -> List[str]:
