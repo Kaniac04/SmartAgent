@@ -13,3 +13,4 @@ starlette
 uvicorn
 python-multipart
 pysafebrowsing
+google-generativeai
