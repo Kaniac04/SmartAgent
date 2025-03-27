@@ -28,47 +28,93 @@
 
     <script>
         const sessionId = crypto.randomUUID();
-        const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/chat`);
+        let ws = null;
         let currentResponse = '';
         let responseDiv = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 5;
         const sendButton = document.getElementById("sendButton");
         const chatInput = document.getElementById("chat-input");
 
-        ws.onopen = () => {
-            console.log("Connected to chat server");
-            ws.send(JSON.stringify({ type: 'init', session_id: sessionId }));
-        };
+        function connectWebSocket() {
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsHost = window.location.host;
+            ws = new WebSocket(`${wsProtocol}//${wsHost}/api/chat`);
 
-        ws.onmessage = (event) => {
-            const chatBox = document.getElementById("chat-box");
-            
-            // If this is the first chunk of a new response
-            if (!responseDiv) {
-                // Remove loading message if exists
-                const loadingMsg = document.querySelector('.loading-message');
-                if (loadingMsg) loadingMsg.remove();
+            ws.onopen = () => {
+                console.log("Connected to chat server");
+                reconnectAttempts = 0;
+                // Send initialization message
+                const initMessage = { 
+                    type: 'init', 
+                    session_id: sessionId 
+                };
+                ws.send(JSON.stringify(initMessage));
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const chatBox = document.getElementById("chat-box");
+                    
+                    // If this is the first chunk of a new response
+                    if (!responseDiv) {
+                        // Remove loading message if exists
+                        const loadingMsg = document.querySelector('.loading-message');
+                        if (loadingMsg) loadingMsg.remove();
+                        
+                        responseDiv = document.createElement('p');
+                        responseDiv.className = 'assistant-message';
+                        chatBox.appendChild(responseDiv);
+                    }
+                    
+                    // Append the new chunk
+                    currentResponse += event.data;
+                    responseDiv.textContent = currentResponse;
+                    
+                    // Auto-scroll to bottom
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    
+                    // Re-enable button after response
+                    sendButton.disabled = false;
+                } catch (error) {
+                    console.error('Error processing message:', error);
+                    handleError('Failed to process response');
+                }
+            };
+
+            ws.onclose = (event) => {
+                console.log('WebSocket closed:', event.code, event.reason);
+                handleReconnection();
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                handleError('Connection error occurred');
+            };
+        }
+
+        function handleReconnection() {
+            if (reconnectAttempts < maxReconnectAttempts) {
+                const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 10000);
+                console.log(`Attempting to reconnect in ${delay}ms...`);
                 
-                responseDiv = document.createElement('p');
-                responseDiv.className = 'assistant-message';
-                chatBox.appendChild(responseDiv);
+                setTimeout(() => {
+                    reconnectAttempts++;
+                    connectWebSocket();
+                }, delay);
+            } else {
+                handleError('Connection lost. Please refresh the page.');
             }
-            
-            // Append the new chunk
-            currentResponse += event.data;
-            responseDiv.textContent = currentResponse;
-            
-            // Auto-scroll to bottom
-            chatBox.scrollTop = chatBox.scrollHeight;
+        }
 
-            // Re-enable button after response
+        function handleError(message) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<span class="error">${message}</span>`;
             sendButton.disabled = false;
-        };
+        }
 
-        ws.onclose = () => {
-            sendButton.disabled = false;
-            currentResponse = '';
-            responseDiv = null;
-        };
+        // Initialize WebSocket connection
+        connectWebSocket();
 
         function sendMessage() {
             const input = chatInput;

@@ -4,6 +4,7 @@ from services.qdrant import qdrant_client
 from config.config import settings
 import logging
 import google.generativeai as genai
+from services.utility import get_embeddings
 
 class RAGAgent:
     def __init__(self):
@@ -35,7 +36,7 @@ class RAGAgent:
 
     def _get_relevant_context(self, query: str, session_id : str, limit: int = 4) -> List[str]:
         """Retrieve and summarize relevant documents from Qdrant"""
-        query_vector = model.encode(query).tolist()
+        query_vector = get_embeddings([query])[0]
         
         search_result = qdrant_client.search(
             collection_name=self.collection_name,
