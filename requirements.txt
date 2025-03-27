@@ -11,6 +11,8 @@ Requests
 sentence_transformers
 starlette
 uvicorn
+uvicorn[standard]
+websockets
 python-multipart
 pysafebrowsing
 google-generativeai
