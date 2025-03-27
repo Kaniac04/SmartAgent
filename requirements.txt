@@ -8,7 +8,6 @@ pysafebrowsing
 python-dotenv
 qdrant_client
 Requests
-sentence_transformers
 starlette
 uvicorn
 uvicorn[standard]
@@ -16,3 +15,6 @@ websockets
 python-multipart
 pysafebrowsing
 google-generativeai
+huggingface_hub
+transformers
+torch

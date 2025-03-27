@@ -2,8 +2,27 @@ from pysafebrowsing import SafeBrowsing
 from urllib.parse import urlparse
 import logging
 from config.config import settings
+from huggingface_hub import InferenceClient
+from typing import List
+
+hf_client = InferenceClient(token=settings.HF_API_TOKEN)
 
 logger = logging.getLogger(__name__)
+
+def get_embeddings(texts: List[str]) -> List[List[float]]:
+    """Get embeddings using Hugging Face Inference API"""
+    try:
+        # The API accepts both single strings and lists of strings
+        embeddings = hf_client.feature_extraction(
+            texts,
+            model=settings.EMBEDDING_MODEL,
+            wait_for_model=True
+        )
+        return embeddings
+    except Exception as e:
+        logger.error(f"Embedding generation failed: {str(e)}")
+        raise
+
 
 safe_browsing = SafeBrowsing(settings.GOOGLE_API_KEY)
 

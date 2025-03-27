@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 from services.mongo import collection,clean_collection
-from services.qdrant import qdrant_client, model
+from services.qdrant import qdrant_client
 import logging
 from requests.exceptions import RequestException
 from pymongo.errors import PyMongoError
@@ -11,6 +11,7 @@ from qdrant_client.http.models import VectorParams, Distance
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import Lock
 from config.config import settings
+from services.utility import get_embeddings 
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -187,13 +188,15 @@ def upsert_to_qdrant(batch_size=5):
         embeddings = []
         valid_data = []
         
-        for doc in data:
+        for i in range(0, len(data), batch_size):
+            batch = data[i:i + batch_size]
             try:
-                embedding = model.encode(doc["content"]).tolist()
-                embeddings.append(embedding)
-                valid_data.append(doc)
+                batch_embeddings = get_embeddings([doc["content"] for doc in batch])
+                embeddings.extend(batch_embeddings)
+                valid_data.extend(batch)
+                logger.info(f"Generated embeddings for batch {i//batch_size + 1}")
             except Exception as e:
-                logger.error(f"Embedding failed for document {doc['url']}: {str(e)}")
+                logger.error(f"Batch embedding failed: {str(e)}")
                 continue
         
         if not embeddings:

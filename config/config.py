@@ -13,5 +13,7 @@ class Settings(BaseSettings):
     EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
     MISTRAL_API_KEY: str = os.getenv("MISTRAL_API_KEY")
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY")
+    HF_API_KEY: str = os.getenv("HF_API_KEY")
+    EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
 
 settings = Settings()
