@@ -5,7 +5,7 @@ from config.config import settings
 from huggingface_hub import InferenceClient
 from typing import List
 
-hf_client = InferenceClient(token=settings.HF_API_TOKEN)
+hf_client = InferenceClient(token=settings.HF_API_KEY)
 
 logger = logging.getLogger(__name__)
 

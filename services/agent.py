@@ -1,6 +1,6 @@
 from typing import List
 from mistralai import Mistral, UserMessage, SystemMessage
-from services.qdrant import qdrant_client, model
+from services.qdrant import qdrant_client
 from config.config import settings
 import logging
 import google.generativeai as genai
