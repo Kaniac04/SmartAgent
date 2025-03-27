@@ -28,7 +28,7 @@
 
     <script>
         const sessionId = crypto.randomUUID();
-        const ws = new WebSocket("ws://127.0.0.1:8000/api/chat");
+        const ws = new WebSocket(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/chat`);
         let currentResponse = '';
         let responseDiv = null;
         const sendButton = document.getElementById("sendButton");

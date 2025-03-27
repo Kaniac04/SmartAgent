@@ -4,6 +4,7 @@ from fastapi.templating import Jinja2Templates
 from api import views, scraper, chat_endpoint
 from services import agent
 import time
+import os
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -37,7 +38,7 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
         "main_:app",
-        host="127.0.0.1",
-        port=8000,
-        reload=True
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", 8000)),
+        reload=False
     )
