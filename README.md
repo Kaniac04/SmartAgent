@@ -1,110 +1,110 @@
+[English] | [日本語](README.ja.md)
+
 # SmartAgent - AI-Powered Documentation Chat System
 
-## Overview
+SmartAgent is a modern web application that transforms static documentation into an interactive chat experience. By leveraging Retrieval-Augmented Generation (RAG), it allows users to query documentation using natural language.
 
-SmartAgent is a modern web application that transforms documentation into an interactive chat experience. Using advanced AI and natural language processing, it allows users to have natural conversations with their documentation.
+---
 
 ## Features
 
-- 🔍 **Smart Web Scraping**: Automatically extracts content from documentation websites
-- 🤖 **AI-Powered Chat**: Natural language interaction with documentation content
-- 🔒 **URL Safety Checks**: Built-in protection against unsafe or malicious websites
-- ⚡ **Real-time Updates**: Live progress tracking for content processing
-- 🌐 **Multi-user Support**: Separate chat sessions for different users
-- 🎨 **Modern Dark Theme**: Clean, high-contrast interface with neon accents
+- Smart Web Scraping: Automatically extracts and cleans content from documentation websites.
+- RAG Architecture: Uses Qdrant Vector Database for lightning-fast semantic search.
+- AI-Powered Chat: Natural language interaction powered by Mistral AI.
+- URL Safety: Integrated Google Safe Browsing API to protect against malicious links.
+- Real-time Tracking: Live progress updates during documentation indexing.
+- Modern UI: Sleek dark-themed interface with neon accents and responsive design.
+
+---
 
 ## Tech Stack
 
-- **Backend**: FastAPI, Python 3.9+
-- **Frontend**: HTML5, CSS3, JavaScript
-- **Database**: MongoDB, Qdrant Vector Database
-- **AI/ML**: Sentence Transformers, Mistral, Sumy, NLTK, BeautifulSoup
-- **Security**: Google Safe Browsing API
+- Backend: FastAPI (Python 3.9+)
+- Vector Store: Qdrant
+- Database: MongoDB (Session & Metadata management)
+- Embeddings: Sentence Transformers
+- LLM: Mistral AI
+- Security: Google Safe Browsing API
+
+---
+
+## How It Works
+
+1. Ingestion: User provides a documentation URL.
+2. Scraping: The system crawls the site and extracts meaningful text.
+3. Indexing: Content is chunked, converted into embeddings, and stored in Qdrant.
+4. Retrieval: When a question is asked, the system finds relevant context from the vector store.
+5. Generation: Mistral AI generates a precise answer based on the retrieved context.
+
+---
 
 ## Installation
 
+### Prerequisites
+- Python 3.9 or higher
+- A running MongoDB instance
+- A Qdrant instance
+
+### Setup
+
 1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/SmartAgent.git
-cd SmartAgent
-```
+   ```bash
+   git clone https://github.com/yourusername/SmartAgent.git
+   cd SmartAgent
+   ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
+2. Create a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-3. Set up environment variables:
-```bash
-MONGODB_URI=your_mongodb_uri
-GOOGLE_SAFE_BROWSING_API_KEY=your_api_key
-QDRANT_HOST=your_qdrant_host
-QDRANT_PORT=your_qdrant_port
-MISTRAL_API_KEY=your_mistralai_api_key
-```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Environment Variables:
+   Create a .env file in the root directory:
+   ```env
+   MONGODB_URI=your_mongodb_uri
+   GOOGLE_SAFE_BROWSING_API_KEY=your_api_key
+   QDRANT_HOST=your_qdrant_host
+   QDRANT_PORT=6333
+   MISTRAL_API_KEY=your_mistralai_api_key
+   ```
+
+---
 
 ## Usage
 
-1. Start the server:
-```bash
-python main_.py
-```
+1. Launch the server:
+   ```bash
+   python main_.py
+   ```
 
-2. Open your browser and navigate to:
-```
-http://localhost:8000
-```
+2. Access the Web UI:
+   Open http://localhost:8000 in your browser.
 
-3. Enter a documentation URL and start chatting!
+---
 
 ## Project Structure
 
-```
+```text
 SmartAgent/
-├── api/
-│   ├── chat_endpoint.py
-│   └── scraper.py
-├── services/
-│   ├── utility.py
-│   └── scraper.py
-├── static/
-│   └── style.css
-├── templates/
-│   ├── base.html
-│   ├── chat.html
-│   ├── home.html
-│   └── how_it_works.html
-└── main_.py
+├── api/                # API Endpoints (Chat & Scraper)
+├── services/           # Business Logic (RAG, Scraping, Utils)
+├── static/             # CSS & JS assets
+├── templates/          # HTML Templates (Jinja2)
+└── main_.py            # Application Entry Point
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
-## Requirements
-
-- Python 3.9+
-- MongoDB
-- Qdrant Vector Database
-- Google Safe Browsing API key
+---
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- FastAPI for the amazing web framework
-- LangChain for AI capabilities
-- Sentence Transformers for text embeddings
-- MongoDB and Qdrant for storage solutions
-
-## Support
-
-For support, please open an issue in the GitHub repository.
+Distributed under the MIT License. See LICENSE for more information.
 
 ---
+
+Disclaimer: This tool is for educational purposes. Always ensure you have permission to scrape documentation from websites.
